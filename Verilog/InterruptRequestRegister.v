@@ -22,7 +22,7 @@
                 delayed_ir_req_line[ir_bit_no] <= 1'b0;
               end
             else if(ir_req_pin[ir_bit_no] == 1'b1) begin
-                delayed_ir_req_line[ir_bit_no] <= 1;
+              delayed_ir_req_line[ir_bit_no] <= 1'b1;
               end
             else begin
                 delayed_ir_req_line[ir_bit_no] <= delayed_ir_req_line[ir_bit_no];
