@@ -51,7 +51,7 @@ function  [7:0] priority_resolve(input [7:0] register);
     else if (register[5] == 1'b1)        priority_resolve = 8'b00100000;
     else if (register[6] == 1'b1)        priority_resolve = 8'b01000000;
     else if (register[7] == 1'b1)        priority_resolve = 8'b10000000;
-    else                                 priority_resolve = 8'b10000000;
+    else                                 priority_resolve = 8'b00000000;
 endfunction
 
 
