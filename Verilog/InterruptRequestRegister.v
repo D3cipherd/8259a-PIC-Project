@@ -3,6 +3,7 @@ module InterruptRequestRegister(
     // inputs from control logic
     input level_or_edge_triggered_mode,
     input [7:0] clear_ir_line,
+    input freeze,
 
     // input from I/O devices
     input reg [7:0] ir_req_pin,
@@ -30,11 +31,11 @@ module InterruptRequestRegister(
                 delayed_ir_req_line[ir_bit_no] <= delayed_ir_req_line[ir_bit_no];
               end
                end
-      
-       // Level Triggered OR Edge Triggered event selector
-      assign  interrupt_req_reg[ir_bit_no] = (clear_ir_line[ir_bit_no] == 1'b1) ? (1'b0) // Clear Bit
-                                            : (level_or_edge_triggered_mode == 1'b0) ? (ir_req_edge[ir_bit_no])  // Edge Triggered Mode
-                                            : (ir_req_pin[ir_bit_no]); // Level Triggered Mode
+       
+        assign  interrupt_req_reg[ir_bit_no] = (clear_ir_line[ir_bit_no] == 1'b1) ? (1'b0)
+                                             : (freeze) ? (interrupt_req_reg[ir_bit_no])
+                                             : (level_or_edge_triggered_mode == 1'b0) ? (ir_req_edge[ir_bit_no])
+                                             : (ir_req_pin[ir_bit_no]);
                                        
     end
     endgenerate 
