@@ -221,5 +221,101 @@ module Control_Logic (
         else
             latch_in_service = (ctrl_state == ACK2) & (cascade_slave_enable == 1'b1) & (nedge_interrupt_acknowledge == 1'b1);
     end
-// End of acknowledge sequence
+    // End of acknowledge sequence
     wire    end_of_ack_sequence =  (ctrl_state != CTL_READY) & (next_ctrl_state == CTL_READY);
+
+    //
+    // Initialization command word 1
+    //
+    // A7-A5
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            interrupt_vector_address[2:0] <= 3'b000;
+        else if (ICW_1 == 1'b1)
+            interrupt_vector_address[2:0] <= internal_bus[7:5];
+        else
+            interrupt_vector_address[2:0] <= interrupt_vector_address[2:0];
+    end
+
+    // LTIM
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            LTIM <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            LTIM <= internal_bus[3];
+        else
+            LTIM <= LTIM;
+    end
+
+    // ADI
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            ADI <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            ADI <= internal_bus[2];
+        else
+            ADI <= ADI;
+    end
+
+    // SNGL
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            SNGL <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            SNGL <= internal_bus[1];
+        else
+            SNGL <= SNGL;
+    end
+
+    // IC4
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            IC4 <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            IC4 <= internal_bus[0];
+        else
+            IC4 <= IC4;
+    end
+
+    //
+    // Initialization command word 2
+    //
+    // A15-A8 (MCS-80) or T7-T3 (8086, 8088)
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            interrupt_vector_address[10:3] <= 3'b000;
+        else if (ICW_1 == 1'b1)
+            interrupt_vector_address[10:3] <= 3'b000;
+        else if (ICW_2 == 1'b1)
+            interrupt_vector_address[10:3] <= internal_bus;
+        else
+            interrupt_vector_address[10:3] <= interrupt_vector_address[10:3];
+    end
+
+    //
+    // Initialization command word 3
+    //
+    // S7-S0 (MASTER) or ID2-ID0 (SLAVE)
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            cascade_device_config <= 8'b00000000;
+        else if (ICW_1 == 1'b1)
+            cascade_device_config <= 8'b00000000;
+        else if (ICW_3 == 1'b1)
+            cascade_device_config <= internal_bus;
+        else
+            cascade_device_config <= cascade_device_config;
+    end
+
+
+    // AEOI
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            AEOI_config <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            AEOI_config <= 1'b0;
+        else if (ICW_4 == 1'b1)
+            AEOI_config <= internal_bus[1];
+        else
+            AEOI_config <= AEOI_config;
+    end
