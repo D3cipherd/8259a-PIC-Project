@@ -84,3 +84,142 @@ module Control_Logic (
         else if (source[7] == 1'b1) bit2num = 3'b111;
         else                        bit2num = 3'b111;
     endfunction
+      // Parameter definitions for command states
+    parameter CMD_READY = 2'b00;
+    parameter WRITE_ICW2 = 2'b01;
+    parameter WRITE_ICW3 = 2'b10;
+    parameter WRITE_ICW4 = 2'b11;
+    
+    // Command state variables
+    reg [1:0] cmd_state;
+    reg [1:0] next_cmd_state;
+// State machine    (Ali & Marwan)
+    always@(*) begin
+        if (ICW_1 == 1'b1)
+            next_cmd_state = WRITE_ICW2;
+        else if (ICW_2_4 == 1'b1) begin
+            casez (cmd_state)
+                WRITE_ICW2: begin
+                    if (SNGL == 1'b0)
+                        next_cmd_state = WRITE_ICW3;
+                    else if (IC4 == 1'b1)
+                        next_cmd_state = WRITE_ICW4;
+                    else
+                        next_cmd_state = CMD_READY;
+                end
+                WRITE_ICW3: begin
+                    if (IC4 == 1'b1)
+                        next_cmd_state = WRITE_ICW4;
+                    else
+                        next_cmd_state = CMD_READY;
+                end
+                WRITE_ICW4: begin
+                    next_cmd_state = CMD_READY;
+                end
+                default: begin
+                    next_cmd_state = CMD_READY;
+                end
+            endcase
+        end
+        else
+            next_cmd_state = cmd_state;
+    end
+
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            cmd_state <= CMD_READY;
+        else
+            cmd_state <= next_cmd_state;
+    end
+
+    // Writing registers/command signals
+    wire    ICW_2 = (cmd_state == WRITE_ICW2) & ICW_2_4;
+    wire    ICW_3 = (cmd_state == WRITE_ICW3) & ICW_2_4;
+    wire    ICW_4 = (cmd_state == WRITE_ICW4) & ICW_2_4;
+    wire    OCW_1_registers = (cmd_state == CMD_READY) & OCW_1;
+    wire    OCW_2_registers = (cmd_state == CMD_READY) & OCW_2;
+    wire    OCW_3_registers = (cmd_state == CMD_READY) & OCW_3;
+
+    
+    // Parameter definitions for control states
+    parameter CTL_READY = 3'b000;
+    parameter ACK1 = 3'b001;
+    parameter ACK2 = 3'b010;
+    
+    // Control state variables
+    reg [2:0] ctrl_state;
+    reg [2:0] next_ctrl_state;
+
+    // Detect ACK edge
+    reg   prev_INTA_n;
+
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            prev_INTA_n <= 1'b1;
+        else
+            prev_INTA_n <= INTA_n;
+    end
+    wire    nedge_interrupt_acknowledge =  prev_INTA_n & ~INTA_n;
+    wire    pedge_interrupt_acknowledge = ~prev_INTA_n &  INTA_n;
+
+    // Detect read signal edge
+    reg   prev_read_signal;
+
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            prev_read_signal <= 1'b0;
+        else
+            prev_read_signal <= read;
+    end
+    wire    nedge_read_signal = prev_read_signal & ~read;
+
+    // State machine
+    always@(*) begin
+        casez (ctrl_state)
+            CTL_READY: begin
+                if (OCW_2_registers == 1'b1)
+                    next_ctrl_state = CTL_READY;
+                else if (nedge_interrupt_acknowledge == 1'b0)
+                    next_ctrl_state = CTL_READY;
+                else
+                    next_ctrl_state = ACK1;
+            end
+            ACK1: begin
+                if (pedge_interrupt_acknowledge == 1'b0)
+                    next_ctrl_state = ACK1;
+                else
+                    next_ctrl_state = ACK2;
+            end
+            ACK2: begin
+                if (pedge_interrupt_acknowledge == 1'b0)
+                    next_ctrl_state = ACK2;
+                else
+                    next_ctrl_state = CTL_READY;
+            end
+
+            default: begin
+                next_ctrl_state = CTL_READY;
+            end
+        endcase
+    end
+
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            ctrl_state <= CTL_READY;
+        else if (ICW_1 == 1'b1)
+            ctrl_state <= CTL_READY;
+        else
+            ctrl_state <= next_ctrl_state;
+    end
+
+    // Latch in service register signal
+    always@(*) begin
+        if (ICW_1 == 1'b1)
+            latch_in_service = 1'b0;
+        else if (cascade_slave == 1'b0)
+            latch_in_service = (ctrl_state == CTL_READY) & (next_ctrl_state != CTL_READY);
+        else
+            latch_in_service = (ctrl_state == ACK2) & (cascade_slave_enable == 1'b1) & (nedge_interrupt_acknowledge == 1'b1);
+    end
+// End of acknowledge sequence
+    wire    end_of_ack_sequence =  (ctrl_state != CTL_READY) & (next_ctrl_state == CTL_READY);
