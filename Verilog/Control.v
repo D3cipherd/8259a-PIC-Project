@@ -320,7 +320,7 @@ module Control_Logic (
             AEOI_config <= AEOI_config;
     end
      //
-    // Operation control words (Marwan)
+    // Operation control words 
     //
     //
     // Operation control word 1
@@ -560,7 +560,7 @@ module Control_Logic (
         else
             interrupt_when_ack1 <= interrupt_when_ack1;
     end
-// control_logic_data_out   (Mohamed)
+    // control_logic_data_out  
     always@(*) begin
         if (INTA_n == 1'b0) begin
             // Acknowledge
