@@ -424,3 +424,74 @@ module Control_Logic (
         end
     end
 
+     // Cascade signals  
+    //
+    // Select master/slave
+    always@(*) begin
+        if (SNGL == 1'b1)
+            cascade_slave = 1'b0;
+        else    
+            cascade_slave = ~SP_EN_n;
+    end
+
+    // Cascade port I/O
+    assign cascade_io = cascade_slave;
+
+    //
+    // Cascade signals (slave)
+    //
+    always@(*) begin
+        if (cascade_slave == 1'b0)
+            cascade_slave_enable = 1'b0;
+        else if (cascade_device_config[2:0] != cascade_in)
+            cascade_slave_enable = 1'b0;
+        else
+            cascade_slave_enable = 1'b1;
+    end
+
+    //
+    // Cascade signals (master)  
+    //
+    wire    interrupt_from_slave_device = (ack_interrupt & cascade_device_config) != 8'b00000000;
+
+    // output ACK2 and ACK3
+    always@(*) begin
+        if (SNGL == 1'b1)
+            cascade_out_ack2 = 1'b1;
+        else if (cascade_slave_enable == 1'b1)
+            cascade_out_ack2 = 1'b1;
+        else if ((cascade_slave == 1'b0) && (interrupt_from_slave_device == 1'b0))
+            cascade_out_ack2 = 1'b1;
+        else
+            cascade_out_ack2 = 1'b0;
+    end
+
+// Output slave id
+    always@(*) begin
+        if (cascade_slave == 1'b1)
+            cascade_out <= 3'b000;
+        else if ((ctrl_state != ACK1) && (ctrl_state != ACK2))
+            cascade_out <= 3'b000;
+        else if (interrupt_from_slave_device == 1'b0)
+            cascade_out <= 3'b000;
+        else begin
+            if (ack_interrupt[0] == 1'b1)
+              control_logic_data_out[2:0] = 3'b000;
+            else if (ack_interrupt[1] == 1'b1)
+              control_logic_data_out[2:0] = 3'b001;
+            else if (ack_interrupt[2] == 1'b1)
+              control_logic_data_out[2:0] = 3'b010;
+            else if (ack_interrupt[3] == 1'b1)
+              control_logic_data_out[2:0] = 3'b011;
+            else if (ack_interrupt[4] == 1'b1)
+              control_logic_data_out[2:0] = 3'b100;
+            else if (ack_interrupt[5] == 1'b1)
+              control_logic_data_out[2:0] = 3'b101;
+            else if (ack_interrupt[6] == 1'b1)
+              control_logic_data_out[2:0] = 3'b110;
+            else if (ack_interrupt[7] == 1'b1)
+              control_logic_data_out[2:0] = 3'b111;
+            else
+              control_logic_data_out[2:0] = 3'b111;
+        end
+    end
