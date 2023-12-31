@@ -319,3 +319,108 @@ module Control_Logic (
         else
             AEOI_config <= AEOI_config;
     end
+     //
+    // Operation control words (Marwan)
+    //
+    //
+    // Operation control word 1
+    //
+    // IMR
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            interrupt_mask <= 8'b11111111;
+        else if (ICW_1 == 1'b1)
+            interrupt_mask <= 8'b11111111;
+        else if ((OCW_1_registers == 1'b1)) 
+            interrupt_mask <= internal_bus;
+        else
+            interrupt_mask <= interrupt_mask;
+    end
+
+    //
+    // Operation control word 2
+    //
+    // End of interrupt
+    always@(*) begin
+        if (ICW_1 == 1'b1)
+            EOI = 8'b11111111;
+        else if ((AEOI_config == 1'b1) && (end_of_ack_sequence == 1'b1))
+            EOI = ack_interrupt;
+        else if (OCW_2 == 1'b1) begin
+            casez (internal_bus[6:5])
+                2'b01:   EOI = highest_level_in_service;
+                2'b11:   EOI = num2bit(internal_bus[2:0]);
+                default: EOI = 8'b00000000;
+            endcase
+        end
+        else
+            EOI = 8'b00000000;
+    end
+// Auto rotate mode
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            auto_rotate_mode <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            auto_rotate_mode <= 1'b0;
+        else if (OCW_2 == 1'b1) begin
+            casez (internal_bus[7:5])
+                3'b000:  auto_rotate_mode <= 1'b0;
+                3'b100:  auto_rotate_mode <= 1'b1;
+                default: auto_rotate_mode <= auto_rotate_mode;
+            endcase
+        end
+        else
+            auto_rotate_mode <= auto_rotate_mode;
+    end
+
+    // Rotate  (Abdelrahman)
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            priority_rotate <= 3'b111;
+        else if (ICW_1 == 1'b1)
+            priority_rotate <= 3'b111;
+        else if ((auto_rotate_mode == 1'b1) && (end_of_ack_sequence == 1'b1))
+            priority_rotate <= bit2num(ack_interrupt);
+        else if (OCW_2 == 1'b1) begin
+            casez (internal_bus[7:5])
+                3'b101: begin  
+                if      (highest_level_in_service[0] == 1'b1) priority_rotate = 3'b000;
+                else if (highest_level_in_service[1] == 1'b1) priority_rotate = 3'b001;
+                else if (highest_level_in_service[2] == 1'b1) priority_rotate = 3'b010;
+                else if (highest_level_in_service[3] == 1'b1) priority_rotate = 3'b011;
+                else if (highest_level_in_service[4] == 1'b1) priority_rotate = 3'b100;
+                else if (highest_level_in_service[5] == 1'b1) priority_rotate = 3'b101;
+                else if (highest_level_in_service[6] == 1'b1) priority_rotate = 3'b110;
+                else if (highest_level_in_service[7] == 1'b1) priority_rotate = 3'b111;
+                else                                          priority_rotate = 3'b111;
+                end
+                default: priority_rotate <= priority_rotate;
+            endcase
+        end
+        else
+            priority_rotate <= priority_rotate;
+    end
+    
+    //
+    // Operation control word 3
+    //
+    // RR/RIS
+    always@(negedge clk, posedge reset) begin
+        if (reset) begin
+            EN_RD_REG     <= 1'b1;
+            read_register_isr_or_irr <= 1'b0;
+        end
+        else if (ICW_1 == 1'b1) begin
+            EN_RD_REG     <= 1'b1;
+            read_register_isr_or_irr <= 1'b0;
+        end
+        else if (OCW_3_registers == 1'b1) begin
+            EN_RD_REG     <= internal_bus[1];
+            read_register_isr_or_irr <= internal_bus[0];
+        end
+        else begin
+            EN_RD_REG     <= EN_RD_REG;
+            read_register_isr_or_irr <= read_register_isr_or_irr;
+        end
+    end
+
