@@ -373,7 +373,7 @@ module Control_Logic (
             auto_rotate_mode <= auto_rotate_mode;
     end
 
-    // Rotate  (Abdelrahman)
+    // Rotate 
     always@(negedge clk, posedge reset) begin
         if (reset)
             priority_rotate <= 3'b111;
