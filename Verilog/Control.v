@@ -560,3 +560,81 @@ module Control_Logic (
         else
             interrupt_when_ack1 <= interrupt_when_ack1;
     end
+// control_logic_data_out   (Mohamed)
+    always@(*) begin
+        if (INTA_n == 1'b0) begin
+            // Acknowledge
+            casez (ctrl_state)
+                CTL_READY: begin
+                    if (cascade_slave == 1'b0) begin
+                            control_logic_out_flag = 1'b0;
+                            control_logic_data_out     = 8'b00000000;
+                    end
+                end
+                ACK1: begin
+                    if (cascade_slave == 1'b0) begin
+                        control_logic_out_flag = 1'b0;
+                        control_logic_data_out     = 8'b00000000;
+                    end
+                end
+                ACK2: begin
+                    if (cascade_out_ack2 == 1'b1) begin
+                        control_logic_out_flag = 1'b1;
+                            
+                        if (cascade_slave == 1'b1) begin
+                          if (interrupt_when_ack1[0] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b000;
+                          else if (interrupt_when_ack1[1] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b001;
+                          else if (interrupt_when_ack1[2] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b010;
+                          else if (interrupt_when_ack1[3] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b011;
+                          else if (interrupt_when_ack1[4] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b100;
+                          else if (interrupt_when_ack1[5] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b101;
+                          else if (interrupt_when_ack1[6] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b110;
+                          else if (interrupt_when_ack1[7] == 1'b1)
+                            control_logic_data_out[2:0] = 3'b111;
+                          else
+                            control_logic_data_out[2:0] = 3'b111;
+                          end 
+                          else begin
+                          if (ack_interrupt[0] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b000;
+                          else if (ack_interrupt[1] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b001;
+                          else if (ack_interrupt[2] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b010;
+                          else if (ack_interrupt[3] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b011;
+                          else if (ack_interrupt[4] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b100;
+                          else if (ack_interrupt[5] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b101;
+                          else if (ack_interrupt[6] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b110;
+                          else if (ack_interrupt[7] == 1'b1)
+                              control_logic_data_out[2:0] = 3'b111;
+                          else
+                              control_logic_data_out[2:0] = 3'b111;
+                          end 
+
+                          control_logic_data_out = {interrupt_vector_address[10:6], control_logic_data_out[2:0]};
+                    end
+                    else begin
+                        control_logic_out_flag = 1'b0;
+                        control_logic_data_out     = 8'b00000000;
+                    end
+                end
+
+                default: begin
+                    control_logic_out_flag = 1'b0;
+                    control_logic_data_out     = 8'b00000000;
+                end
+            endcase
+        end
+        end
+endmodule
