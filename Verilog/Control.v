@@ -495,3 +495,68 @@ module Control_Logic (
               control_logic_data_out[2:0] = 3'b111;
         end
     end
+
+    //
+    // Interrupt control signals
+    //
+    // INT
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            INT <= 1'b0;
+        else if (ICW_1 == 1'b1)
+            INT <= 1'b0;
+        else if (interrupt != 8'b00000000)
+            INT <= 1'b1;
+        else if (end_of_ack_sequence == 1'b1)
+            INT <= 1'b0;
+        else
+            INT <= INT;
+    end
+
+    // freeze
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            freeze <= 1'b1;
+        else if (next_ctrl_state == CTL_READY)
+            freeze <= 1'b0;
+        else
+            freeze <= 1'b1;
+    end
+
+    // clear_interrupt_request
+    always@(*) begin
+        if (ICW_1 == 1'b1)
+            clear_interrupt_request = 8'b11111111;
+        else if (latch_in_service == 1'b0)
+            clear_interrupt_request = 8'b00000000;
+        else
+            clear_interrupt_request = interrupt;
+    end
+
+    // interrupt buffer
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            ack_interrupt <= 8'b00000000;
+        else if (ICW_1 == 1'b1)
+            ack_interrupt <= 8'b00000000;
+        else if (end_of_ack_sequence)
+            ack_interrupt <= 8'b00000000;
+        else if (latch_in_service == 1'b1)
+            ack_interrupt <= interrupt;
+        else
+            ack_interrupt <= ack_interrupt;
+    end
+
+    // interrupt buffer
+    reg   [7:0]   interrupt_when_ack1;
+
+    always@(negedge clk, posedge reset) begin
+        if (reset)
+            interrupt_when_ack1 <= 8'b00000000;
+        else if (ICW_1 == 1'b1)
+            interrupt_when_ack1 <= 8'b00000000;
+        else if (ctrl_state == ACK1)
+            interrupt_when_ack1 <= interrupt;
+        else
+            interrupt_when_ack1 <= interrupt_when_ack1;
+    end
