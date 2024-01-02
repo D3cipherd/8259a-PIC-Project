@@ -93,7 +93,7 @@ module Control_Logic (
     // Command state variables
     reg [1:0] cmd_state;
     reg [1:0] next_cmd_state;
-// State machine    (Ali & Marwan)
+// State machine    
     always@(*) begin
         if (ICW_1 == 1'b1)
             next_cmd_state = WRITE_ICW2;
@@ -454,7 +454,7 @@ module Control_Logic (
     //
     wire    interrupt_from_slave_device = (ack_interrupt & cascade_device_config) != 8'b00000000;
 
-    // output ACK2 and ACK3
+    // output ACK2
     always@(*) begin
         if (SNGL == 1'b1)
             cascade_out_ack2 = 1'b1;
