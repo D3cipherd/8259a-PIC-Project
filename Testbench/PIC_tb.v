@@ -50,7 +50,7 @@ module PIC_tb;
         interrupt_request       = 8'b00000000;
         reset                   = 1'b1;
         #(`TB_CYCLE * 12);
-//240        
+        
         //ICW1
         #(`TB_CYCLE * 0);
         reset           = 1'b0;
@@ -62,9 +62,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-        //data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
- // 280      
+       
         //ICW2
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -77,8 +77,8 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 320        
-        //ICW3
+
+        //ICW4
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
         write_enable_n  = 1'b0;
@@ -90,20 +90,7 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 360
-        //ICW4
-        #(`TB_CYCLE * 0);
-        chip_select_n   = 1'b0;
-        write_enable_n  = 1'b0;
-        address         = 1'b1;
-        data_bus_in     = 8'b00000001;
-        #(`TB_CYCLE * 1);
-        chip_select_n   = 1'b1;
-        write_enable_n  = 1'b1;
-        address         = 1'b0;
-  //      data_bus_in     = 8'b00000000;
-        #(`TB_CYCLE * 1);
-// 400
+
         //OCW1
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -114,9 +101,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-      //  data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 440        
+      
         //OCW3
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -129,15 +116,13 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 480   
   
         // Single bit Interrupt
         //Interrupt
         #(`TB_CYCLE * 0);
         interrupt_request = 8'b00000100;
         #(`TB_CYCLE * 1);
-       // interrupt_request = 8'b00000000;
-// 500     
+    
 
         //Send ACK
         #(`TB_CYCLE * 0);
@@ -166,19 +151,12 @@ module PIC_tb;
         #(`TB_CYCLE * 1);
       
         
-        //Interrupt
-        #(`TB_CYCLE * 0);
-        interrupt_request = 8'b00000001;
-        #(`TB_CYCLE * 1);
-       // interrupt_request = 8'b00000000;
-        
            
         // Mask + Higher Prio In Service
         //Interrupt
-        #(`TB_CYCLE * 0);
+        #(`TB_CYCLE * 1);
         interrupt_request = 8'b00010101;
         #(`TB_CYCLE * 1);
-      //  interrupt_request = 8'b00000000;
         
         //Send ACK
         #(`TB_CYCLE * 0);
@@ -205,8 +183,155 @@ module PIC_tb;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
         
+        // 2nd Cycle (EOI + Fully Nested + Edge Triggered)
+        
+        //Intialization
+        #(`TB_CYCLE * 0);
+        chip_select_n           = 1'b1;
+        read_enable_n           = 1'b1;
+        write_enable_n          = 1'b1;
+        address                 = 1'b0;
+        data_bus_in             = 8'b00000000;
+        cascade_in              = 3'b000;
+        interrupt_acknowledge_n = 1'b1;
+        interrupt_request       = 8'b00000000;
+        reset                   = 1'b1;
+        #(`TB_CYCLE * 12);
+        
+        //ICW1
+        #(`TB_CYCLE * 0);
+        reset           = 1'b0;
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 0;
+        data_bus_in     = 8'b00010111;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+      
+        //ICW2
+        #(`TB_CYCLE * 0);
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 1'b1;
+        data_bus_in     = 8'b10001000;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+
+        //ICW4
+        #(`TB_CYCLE * 0);
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 1'b1;
+        data_bus_in     = 8'b00000001;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+
+        //OCW1
+        #(`TB_CYCLE * 0);
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 1'b1;
+        data_bus_in     = 8'b00000001;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+        
+        //OCW3
+        #(`TB_CYCLE * 0);
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 1'b0;
+        data_bus_in     = 8'b00001010;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+   
+  
+        // Single bit Interrupt
+        //Interrupt
+        #(`TB_CYCLE * 0);
+        interrupt_request = 8'b00000100;
+        #(`TB_CYCLE * 1);
+    
+
+        //Send ACK
+        #(`TB_CYCLE * 0);
+        interrupt_acknowledge_n = 1'b1;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b0;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b1;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b0;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b1;
+
+        
+        //SEND_NON_SPECIFIC_EOI
+        #(`TB_CYCLE * 0);
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 1'b0;
+        data_bus_in     = 8'b00100000;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+      
+        
            
-        // 2nd Cycle (AEOI + Rotate)   
+        // Mask + Higher Prio In Service
+        //Interrupt
+        #(`TB_CYCLE * 1);
+        interrupt_request = 8'b00010101;
+        #(`TB_CYCLE * 1);
+        
+        //Send ACK
+        #(`TB_CYCLE * 0);
+        interrupt_acknowledge_n = 1'b1;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b0;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b1;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b0;
+        #(`TB_CYCLE * 1);
+        interrupt_acknowledge_n = 1'b1;
+        
+        //SEND_NON_SPECIFIC_EOI
+        #(`TB_CYCLE * 0);
+        chip_select_n   = 1'b0;
+        write_enable_n  = 1'b0;
+        address         = 1'b0;
+        data_bus_in     = 8'b00100000;
+        #(`TB_CYCLE * 1);
+        chip_select_n   = 1'b1;
+        write_enable_n  = 1'b1;
+        address         = 1'b0;
+        data_bus_in     = 8'b00000000;
+        #(`TB_CYCLE * 1);
+           
+        // 3rd Cycle (AEOI + Rotate)   
            
         //Intialization
         #(`TB_CYCLE * 0);
@@ -232,9 +357,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-        //data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
- // 280      
+       
         //ICW2
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -247,22 +372,7 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 320  
-        /*      
-        //ICW3
-        #(`TB_CYCLE * 0);
-        chip_select_n   = 1'b0;
-        write_enable_n  = 1'b0;
-        address         = 1'b1;
-        data_bus_in     = 8'b00000000;
-        #(`TB_CYCLE * 1);
-        chip_select_n   = 1'b1;
-        write_enable_n  = 1'b1;
-        address         = 1'b0;
-        data_bus_in     = 8'b00000000;
-        #(`TB_CYCLE * 1);
-        */
-// 360
+
         //ICW4
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -273,9 +383,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-  //      data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 400
+
         //OCW1
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -286,9 +396,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-      //  data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 440        
+        
         //OCW2
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -299,7 +409,7 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-      //  data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
         
         
@@ -316,13 +426,11 @@ module PIC_tb;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
         
-        
        
         //Interrupt
         #(`TB_CYCLE * 0);
         interrupt_request = 8'b00010101;
         #(`TB_CYCLE * 1);
-      //  interrupt_request = 8'b00000000;
         
         //Send ACK
         #(`TB_CYCLE * 0);
@@ -364,7 +472,7 @@ module PIC_tb;
         #(`TB_CYCLE * 1);
       
        
-               // 2nd Cycle (AEOI)   
+        // 4th Cycle (AEOI + No Rotation)   
            
         //Intialization
         #(`TB_CYCLE * 0);
@@ -379,7 +487,7 @@ module PIC_tb;
         reset                   = 1'b1;
         #(`TB_CYCLE * 12);
         
-          //ICW1
+        //ICW1
         #(`TB_CYCLE * 0);
         reset           = 1'b0;
         chip_select_n   = 1'b0;
@@ -390,9 +498,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-        //data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
- // 280      
+     
         //ICW2
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -405,22 +513,7 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 320  
-        /*      
-        //ICW3
-        #(`TB_CYCLE * 0);
-        chip_select_n   = 1'b0;
-        write_enable_n  = 1'b0;
-        address         = 1'b1;
-        data_bus_in     = 8'b00000000;
-        #(`TB_CYCLE * 1);
-        chip_select_n   = 1'b1;
-        write_enable_n  = 1'b1;
-        address         = 1'b0;
-        data_bus_in     = 8'b00000000;
-        #(`TB_CYCLE * 1);
-        */
-// 360
+        
         //ICW4
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -431,9 +524,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-  //      data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 400
+
         //OCW1
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -444,9 +537,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-      //  data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 440        
+        
         //OCW2
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -457,7 +550,7 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-      //  data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
         
         
@@ -480,7 +573,6 @@ module PIC_tb;
         #(`TB_CYCLE * 0);
         interrupt_request = 8'b00010101;
         #(`TB_CYCLE * 1);
-      //  interrupt_request = 8'b00000000;
         
         //Send ACK
         #(`TB_CYCLE * 0);
@@ -523,10 +615,10 @@ module PIC_tb;
           
        
        
-       
-     // 4th Cycle (Cascade)  
-        
-         //Intialization
+        //  
+        // 5th Cycle (Cascade)  
+        //   
+        //Intialization
         #(`TB_CYCLE * 0);
         chip_select_n           = 1'b1;
         read_enable_n           = 1'b1;
@@ -539,7 +631,7 @@ module PIC_tb;
         reset                   = 1'b1;
         #(`TB_CYCLE * 12);
         
-          //ICW1
+        //ICW1
         #(`TB_CYCLE * 0);
         reset           = 1'b0;
         chip_select_n   = 1'b0;
@@ -550,9 +642,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-        //data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
- // 280      
+       
         //ICW2
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -565,7 +657,7 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 320        
+        
         //ICW3
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -579,7 +671,7 @@ module PIC_tb;
         address         = 1'b0;
         data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 360
+
         //ICW4
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -590,9 +682,9 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-  //      data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
-// 400
+
         //OCW1
         #(`TB_CYCLE * 0);
         chip_select_n   = 1'b0;
@@ -603,7 +695,7 @@ module PIC_tb;
         chip_select_n   = 1'b1;
         write_enable_n  = 1'b1;
         address         = 1'b0;
-      //  data_bus_in     = 8'b00000000;
+        data_bus_in     = 8'b00000000;
         #(`TB_CYCLE * 1);
         
         
@@ -625,7 +717,7 @@ module PIC_tb;
         #(`TB_CYCLE * 0);
         interrupt_request = 8'b10000000;
         #(`TB_CYCLE * 1);
-      //  interrupt_request = 8'b00000000;
+        
         
         //Send ACK
         #(`TB_CYCLE * 0);
@@ -657,3 +749,4 @@ module PIC_tb;
     end
 
 endmodule
+
