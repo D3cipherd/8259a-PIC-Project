@@ -18,7 +18,9 @@ module InterruptRequestRegister(
         for(ir_bit_no = 0; ir_bit_no < 8; ir_bit_no = ir_bit_no + 1) begin
             // (Positive) Edge triggered
             always@(negedge clk, posedge reset) begin
-                if(clear_ir_line[ir_bit_no]) begin
+                if(reset)
+                    delayed_ir_req_line[ir_bit_no] <= 1'b0;
+                else if(clear_ir_line[ir_bit_no]) begin
                     delayed_ir_req_line[ir_bit_no] <= 1'b0;
                 end
                 else if(~ir_req_pin[ir_bit_no] == 1'b1) begin
@@ -29,9 +31,12 @@ module InterruptRequestRegister(
                 end
             end
             
-            assign ir_req_edge[ir_bit_no] = (ir_req_pin[ir_bit_no] == 1'b1) & (delayed_ir_req_line[ir_bit_no] == 1'b1);
+            assign ir_req_edge[ir_bit_no] = (clear_ir_line[ir_bit_no]) ? 1'b0
+                                          : (ir_req_edge[ir_bit_no] == 1 & ir_req_pin[ir_bit_no] == 1) ? (1'b1)  
+                                          : (ir_req_pin[ir_bit_no] == 1'b1) & (delayed_ir_req_line[ir_bit_no] == 1'b1);
        
-            // Level/Edge Mode Selector
+       
+       
             always@(negedge clk, posedge reset) begin
             if (reset)
                 interrupt_req_reg[ir_bit_no] <= 1'b0;
