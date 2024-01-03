@@ -14,3 +14,4 @@
 - Cascade Mode
 
 ## Block
+![Block Diagram](Block_Diagram.png)
